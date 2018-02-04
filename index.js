@@ -1,10 +1,51 @@
-const http = require('http')
+const express = require('express')
+const app = express()
 
-const app = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' })
-  res.end('Hello World! t. Node')
+let persons = [
+  {
+    "name": "Arto Hellas",
+    "number": "040-123456",
+    "id": 1
+  },
+  {
+    "name": "Martti Tienari",
+    "number": "040-123456",
+    "id": 2
+  },
+  {
+    "name": "Arto Järvinen",
+    "number": "040-123456",
+    "id": 3
+  },
+  {
+    "name": "Lea Kutvonen",
+    "number": "040-123456",
+    "id": 4
+  }
+]
+
+
+
+app.get('/info', (req, res) => {
+  res.send(`<div>Puhelinluettelossa on ${persons.length} henkilön tiedot.</div><div>${Date()}</div>`)
 })
 
-const port = 3001
-app.listen(port)
-console.log(`Server running on port ${port}`)
+app.get('/api/persons', (req, res) => {
+  res.json(persons)
+})
+
+app.get('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+  const person = persons.find(note => note.id === id)
+
+  if ( person ) {
+    response.json(person)
+  } else {
+    response.status(404).end()
+  }
+})
+
+const PORT = 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
