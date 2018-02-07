@@ -1,7 +1,12 @@
 const express = require('express')
-const app = express()
+const morgan = require('morgan')
 const bodyParser = require('body-parser')
 
+const app = express()
+morgan.token('data', (req) => {
+    return JSON.stringify(req.body)
+})
+app.use(morgan(':method :url :data :status :res[content-length] - :response-time ms'))
 app.use(bodyParser.json())
 
 let persons = [
@@ -56,12 +61,32 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 app.post('/api/persons', (request, response) => {
+
+  if (request.body.name === undefined) {
+    return response.status(400).json({error: 'name missing'})
+  }
+
+  if (request.body.number === undefined) {
+    return response.status(400).json({error: 'number missing'})
+  }
+
   const person = request.body
-  person.id = Math.floor(Math.random() * 9999 + 9999)
-  console.log(person)
-  persons.push(person)
-  response.json(person)
+
+  if (persons.find(person => person.name === request.body.name) === undefined) {
+    person.id = Math.floor(Math.random() * 9999 + 9999)
+    console.log(person)
+    persons.push(person)
+    response.json(person)
+  } else {
+    return response.status(400).json({error: 'name is already on our server'})
+  }
 })
+
+const error = (request, response) => {
+  response.status(404).send({error: 'unknown endpoint'})
+}
+
+app.use(error)
 
 const PORT = 3001
 app.listen(PORT, () => {
