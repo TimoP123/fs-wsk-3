@@ -60,19 +60,24 @@ app.post('/api/persons', (request, response) => {
     return response.status(400).json({error: 'name or number missing'})
   }
 
-  const person = new Person({
-    name: body.name,
-    number: body.number
+  Person.find({ name: body.name }).then(result => {
+    if (result.length !== 0) {
+      response.status(400).json({error: "Person is already in database!"});
+    } else {
+      const person = new Person({
+        name: body.name,
+        number: body.number
+      })
+      person
+        .save()
+        .then(savedPerson => {
+          response.json(Person.format(savedPerson))
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
   })
-
-  person
-    .save()
-    .then(savedPerson => {
-      response.json(Person.format(savedPerson))
-    })
-    .catch(error => {
-      console.log(error);
-    });
 })
 
 app.put("/api/persons/:id", (request, response) => {
