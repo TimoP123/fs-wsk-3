@@ -1,4 +1,5 @@
 dbinfo.txt
+.env
 
 # dependencies
 /node_modules
